@@ -24,20 +24,37 @@ public class EvaluateRecommender {
 
 	public static void main(String[] args) throws Exception {
 		DataModel model = new FileDataModel(new File("data/movies.csv"));
-		RecommenderEvaluator evaluator =  new RMSRecommenderEvaluator();
-		RecommenderBuilder builder = new MyRecommenderBuilder();
-		double result = evaluator.evaluate(builder, null, model, 0.9, 1.0);
-		System.out.println(result);
+		//RecommenderEvaluator evaluator = new AverageAbsoluteDifferenceRecommenderEvaluator();
+		RecommenderEvaluator evaluator = new RMSRecommenderEvaluator();		
+		int begin = 10;
+		int end = 200;
+		int step = 10;
+		for(int i = begin; i <= end; i = i + step){
+			RecommenderBuilder builder = new MyRecommenderBuilder(i, new LogLikelihoodSimilarity(model));
+			double result = evaluator.evaluate(builder, null, model, 0.9, 1.0);
+			System.out.println("k = " + i + ", result = " + result);
+		}		
 	}
 
 }
 
 class MyRecommenderBuilder implements  RecommenderBuilder {
+	
+	private ItemSimilarity similarity;
+	private int k;
+	private int maxiteration;
+	
+	public MyRecommenderBuilder(int k, ItemSimilarity similarity){
+		this.k = k;
+		this.similarity = similarity;
+		maxiteration = 10000;
+	}
+	
 
 	public Recommender buildRecommender(DataModel dataModel)
 			throws TasteException {
 		
-		ItemSimilarity is = new KMeansItemSimilarity(dataModel, 50, 10000, new PearsonCorrelationSimilarity(dataModel));	
+		ItemSimilarity is = new KMeansItemSimilarity(dataModel, k, maxiteration, similarity);	
 		//ItemSimilarity is = new LogLikelihoodSimilarity(dataModel);
 		return new GenericItemBasedRecommender(dataModel, is);
 	}
