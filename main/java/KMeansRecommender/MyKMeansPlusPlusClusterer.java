@@ -218,6 +218,7 @@ public class MyKMeansPlusPlusClusterer<T extends Clusterable> extends Clusterer<
         assignPointsToClusters(clusters, points, assignments);
 
         // iterate through updating the centers until we're done
+        int finalchange = 0;
         final int max = (maxIterations < 0) ? Integer.MAX_VALUE : maxIterations;
         for (int count = 0; count < max; count++) {
             boolean emptyCluster = false;
@@ -246,13 +247,16 @@ public class MyKMeansPlusPlusClusterer<T extends Clusterable> extends Clusterer<
             }
             int changes = assignPointsToClusters(newClusters, points, assignments);
             clusters = newClusters;
-
+            finalchange = changes; //for test
             // if there were no more changes in the point-to-cluster assignment
             // and there are no empty clusters left, return the current clusters
             if (changes == 0 && !emptyCluster) {
+            	System.out.println("iteration time: " + count + ", changes : 0");  //for test
                 return clusters;
             }
+            
         }
+        System.out.println("iteration time: " + max + ", changes : " + finalchange);  //for test  
         return clusters;
     }
 

@@ -23,16 +23,18 @@ import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 public class EvaluateRecommender {
 
 	public static void main(String[] args) throws Exception {
-		DataModel model = new FileDataModel(new File("data/movies.csv"));
+		DataModel model = new FileDataModel(new File("data/movies1m.csv"));
 		//RecommenderEvaluator evaluator = new AverageAbsoluteDifferenceRecommenderEvaluator();
 		RecommenderEvaluator evaluator = new RMSRecommenderEvaluator();		
 		int begin = 10;
-		int end = 200;
-		int step = 10;
+		int end = 400;
+		int step = 50;
 		for(int i = begin; i <= end; i = i + step){
-			RecommenderBuilder builder = new MyRecommenderBuilder(i, new LogLikelihoodSimilarity(model));
+			RecommenderBuilder builder = new MyRecommenderBuilder(i, new PearsonCorrelationSimilarity(model));
 			double result = evaluator.evaluate(builder, null, model, 0.9, 1.0);
+			System.out.println("Compute KMeans with PearsonCorrelationSimilarity");
 			System.out.println("k = " + i + ", result = " + result);
+			System.out.println();
 		}		
 	}
 
@@ -47,14 +49,15 @@ class MyRecommenderBuilder implements  RecommenderBuilder {
 	public MyRecommenderBuilder(int k, ItemSimilarity similarity){
 		this.k = k;
 		this.similarity = similarity;
-		maxiteration = 10000;
+		maxiteration = 50;
 	}
 	
 
 	public Recommender buildRecommender(DataModel dataModel)
 			throws TasteException {
 		
-		ItemSimilarity is = new KMeansItemSimilarity(dataModel, k, maxiteration, similarity);	
+		ItemSimilarity is = new KMeansItemSimilarity(dataModel, k, maxiteration, similarity);
+		//PearsonCorrelationSimilarity
 		//ItemSimilarity is = new LogLikelihoodSimilarity(dataModel);
 		return new GenericItemBasedRecommender(dataModel, is);
 	}
